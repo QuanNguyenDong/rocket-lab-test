@@ -8,23 +8,42 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useGlobalContext } from "@/context/GlobalProvider";
 import { useState } from "react";
 import { router } from "expo-router";
 
 export default function Signin() {
-  const { setIsLogged } = useGlobalContext();
   const [email, onChangeEmail] = useState("");
   const [password, onChangePassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const onPress = () => {
-    setLoading(true);
+  const API_URL = "https://testvm1.rokt.io/api/jsonql";
+  // should be env var
+  const API_KEY = "c37861c7-7414-4a40-bbd8-3343662e4483";
+
+  const onPress = async () => {
     try {
-      setIsLogged(true);
-      router.replace("home");
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': API_KEY
+        },
+        body: JSON.stringify({
+          "authLogin": {
+            email,
+            "pass": password
+          }
+        })
+      })
+
+      if (!res.ok) { throw Error("Invalid Auth") }
+
+      const user = await res.json()
+      // set the token
+      // set the user
+      router.replace("/home")
     } catch (err) {
-      console.log(err);
+      alert(err);
     }
   };
 
